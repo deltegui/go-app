@@ -1,8 +1,10 @@
-module github.com/maxence-charriere/go-app/v10
+module github.com/deltegui/go-app/v10
 
 go 1.23.0
 
 toolchain go1.24.0
+
+replace github.com/maxence-charriere/go-app/v10 => github.com/deltegui/go-app/v10 v10.0.0
 
 require (
 	github.com/SherClockHolmes/webpush-go v1.4.0
