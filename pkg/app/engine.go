@@ -30,6 +30,8 @@ type engineX struct {
 	updates updateManager
 	body    HTMLBody
 
+	idMountPoint *string
+
 	dispatches chan func()
 	defers     chan func()
 	goroutines sync.WaitGroup
@@ -70,6 +72,12 @@ func newEngine(ctx context.Context, routes *router, resolveURL func(string) stri
 	}
 
 	engine.initBrowser()
+	return engine
+}
+
+func newEngineWithMountPoint(ctx context.Context, routes *router, resolveURL func(string) string, originPage *requestPage, actionHandlers map[string]ActionHandler, mountPoint string) *engineX {
+	engine := newEngine(ctx, routes, resolveURL, originPage, actionHandlers)
+	engine.idMountPoint = &mountPoint
 	return engine
 }
 
@@ -199,18 +207,10 @@ func (e *engineX) page() Page {
 
 func (e *engineX) Load(v Composer) error {
 	if e.body == nil {
-		body := Body()
-		body = body.setJSElement(Window().Get("document").Get("body")).(HTMLBody)
-
-		firstChild := Div()
-		firstChild = firstChild.setJSElement(body.JSValue().firstElementChild()).(HTMLDiv)
-		firstChild = firstChild.setParent(body).(HTMLDiv)
-
-		body = body.setBody([]UI{firstChild}).(HTMLBody)
-		e.body = body
+		e.body = e.genBody()
 
 		for action, handler := range e.asynchronousActionHandlers {
-			e.actions.Handle(action, body, true, handler)
+			e.actions.Handle(action, e.body, true, handler)
 		}
 	}
 
@@ -220,6 +220,41 @@ func (e *engineX) Load(v Composer) error {
 	}
 	e.body = body.(HTMLBody)
 	return nil
+}
+
+func (e *engineX) genBody() HTMLBody {
+	if e.idMountPoint == nil {
+		return e.genDefaultBody()
+	} else {
+		return e.genMountPointBody()
+	}
+}
+
+func (e *engineX) genDefaultBody() HTMLBody {
+	body := Body()
+	body = body.setJSElement(Window().Get("document").Get("body")).(HTMLBody)
+
+	firstChild := Div()
+	firstChild = firstChild.setJSElement(body.JSValue().firstElementChild()).(HTMLDiv)
+	firstChild = firstChild.setParent(body).(HTMLDiv)
+
+	body = body.setBody([]UI{firstChild}).(HTMLBody)
+
+	return body
+}
+
+func (e *engineX) genMountPointBody() HTMLBody {
+	body := Body()
+
+	body = body.setJSElement(Window().Get("document").Call("querySelector", "#"+*e.idMountPoint)).(HTMLBody)
+
+	firstChild := Div()
+	firstChild = firstChild.setJSElement(body.JSValue().firstElementChild()).(HTMLDiv)
+	firstChild = firstChild.setParent(body).(HTMLDiv)
+
+	body = body.setBody([]UI{firstChild}).(HTMLBody)
+
+	return body
 }
 
 // Start initiates the main event loop of the engine at the specified framerate.

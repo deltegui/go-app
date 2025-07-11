@@ -111,6 +111,32 @@ func RunWhenOnBrowser() {
 	engine.Start(120)
 }
 
+func RunWhenOnBrowserWithMountPoint(idMountPoint string) {
+	if IsServer {
+		return
+	}
+
+	defer func() {
+		err := recover()
+		displayLoadError(err)
+		panic(err)
+	}()
+
+	resolveURL := clientResourceResolver(Getenv("GOAPP_STATIC_RESOURCES_URL"))
+	originPage := makeRequestPage(Window().URL(), resolveURL)
+
+	engine := newEngineWithMountPoint(context.Background(),
+		&routes,
+		resolveURL,
+		&originPage,
+		actionHandlers,
+		idMountPoint,
+	)
+
+	engine.Navigate(window.URL(), false)
+	engine.Start(120)
+}
+
 func displayLoadError(err any) {
 	loadingLabel := Window().
 		Get("document").
