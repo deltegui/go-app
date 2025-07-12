@@ -13,6 +13,33 @@
     <a href="https://opencollective.com/go-app" alt="Financial Contributors on Open Collective"><img src="https://opencollective.com/go-app/all/badge.svg?label=open+collective&color=4FB9F6" /></a>
 </p>
 
+## Modificaciones hechas por mí
+Este proyecto es flipante, pero tengo un caso de uso que no estaba contemplado. Quiero poder usar este framework pero no como una SPA, si no dentro de una aplicación clásica con renderización en backend y javascript. Para ello, se necesita añadir soporte para crear un punto de montaje para la SPA (algo así):
+
+```html
+<div id="mountpoint">
+
+</div>
+```
+
+Para ello se ha añadido una implementación alternativa a la funcion "app.RunWhenOnBrowser()" para que acepte un id de un nodo html como punto de montaje:
+
+```go
+app.RunWhenOnBrowserWithMountPoint("mountpoint")
+```
+
+Esto, en vez de buscar el body y susituir el primer hijo por la SPA, hace lo mismo pero indicando el id del punto de montaje. Es importante saber que sustituye el primer hijo del nodo con el id "mountpoint", por lo que necesitas añadir un hijo al menos para que sea sustituido. Algo así:
+
+```html
+<div id="mountpoint">
+	<span></span>
+</div>
+```
+
+Con esto es suficiente para que funcione.
+
+## What is Go-app
+
 Go-app is a package for **building progressive web apps (PWA)** with the [Go programming language (Golang)](https://golang.org) and [WebAssembly (Wasm)](https://webassembly.org).
 
 Shaping a UI is done by using a **[declarative syntax](https://go-app.dev/declarative-syntax) that creates and compose HTML elements only by using the Go programing language**.
