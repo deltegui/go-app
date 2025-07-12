@@ -245,9 +245,8 @@ func (e *engineX) genDefaultBody() HTMLBody {
 
 func (e *engineX) genMountPointBody() HTMLBody {
 	body := Body()
-
-	body = body.setJSElement(Window().Get("document").Call("querySelector", "#"+*e.idMountPoint)).(HTMLBody)
-
+	jsElement := Window().Get("document").Call("getElementById", *e.idMountPoint)
+	body = body.setJSElement(jsElement).(HTMLBody)
 	firstChild := Div()
 	firstChild = firstChild.setJSElement(body.JSValue().firstElementChild()).(HTMLDiv)
 	firstChild = firstChild.setParent(body).(HTMLDiv)
